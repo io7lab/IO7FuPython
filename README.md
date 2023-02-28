@@ -1,18 +1,17 @@
-# ESP32 IOTDevice Library
+# IO7 Foundataion fro Micropython
 
-This consists of two modules. the ComMgr and the IOTDevice.
+This consists of two modules. the ComMgr and the IO7FuPython.
 
-## IOTDevice
+## IO7FuPython
 
-This creates the IOTDevice. It can be called with either a configuration option or all parameters
+This creates a IOT Device. It can be called with either a configuration option or all parameters
 1. With all parameters
 ```python
     from IOTDevice import Device
     
     device=Device(
-        devId = 'mydevice',
-        devType = 'mytype',
         broker = '192.168.1.9',
+        devId = 'mydevice',
         token = 'mytoken'
     )
     device.setCallback(sub_cb)				# subsription callback. ie. command handler
@@ -23,10 +22,9 @@ This creates the IOTDevice. It can be called with either a configuration option 
     from IOTDevice import Device
     
     option = {
-        devId : 'mydevice',
-        devType : 'mytype',
-        broker : '192.168.1.9',
-        token : 'mytoken'
+        broker = '192.168.1.9',
+        devId = 'mydevice',
+        token = 'mytoken'
     }
     device = Device(cfg = option)
     device.setCallback(sub_cb)				# subsription callback. ie. command handler
@@ -51,6 +49,8 @@ If there is a file named 'device.cfg' and the content is something like above, y
     device = ConfiguredDevice()
     device.setCallback(sub_cb)				# subsription callback. ie. command handler
 ```
+4. If there is a file named 'ca.crt' with the TLS certicate in it, the device will use the secure mqtt connection to the server.
+
 
 ## ESP32 CommMgr.py
 
