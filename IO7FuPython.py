@@ -8,18 +8,18 @@ class Device():
         This creates the IOTDevice. It can be called with either a configuration option or all parameters
         1. With all parameters
             device=Device(
-                devId = 'mydevice',
-                devType = 'mytype',
                 broker = '192.168.1.9',
-                token = 'mytoken'
+                devId = 'mydevice',
+                token = 'mytoken',
+                caFile = ''
             )
         
         2. With option.
             option = {
-                devId : 'mydevice',
-                devType : 'mytype',
-                broker : '192.168.1.9',
-                token : 'mytoken'
+                broker = '192.168.1.9',
+                devId = 'mydevice',
+                token = 'mytoken',
+                caFile = ''
             }
             device = Device(cfg = option)
 
@@ -29,28 +29,36 @@ class Device():
             device = Device(cfg = option)
  
     '''
-    def __init__(self, cfg=None, devId=None, devType=None, broker=None, token=None, keepalive=60):
+    def __init__(self, cfg=None, broker=None, devId=None, token=None, caFile = None, keepalive=60):
         if cfg:
-            self.devId = cfg['devId']
-            self.devType = cfg['devType']
             self.broker = cfg['broker']
-            self.token = cfg['token']
+            self.devId = cfg['devId']
+            self.token = cfg['token'] if 'token' in cfg else None
+            self.caFile = cfg['caFile'] if 'caFile' in cfg else None
         else:
-            self.devId = devId
-            self.devType = devType
             self.broker = broker
+            self.devId = devId
             self.token = token
+            self.caFile = caFile
         self.callback = None
         self.resetCallback = None
-        self.client = MQTTClient(self.devId, self.broker, keepalive=keepalive)
+        if self.caFile is None:
+            port = '1883'
+        else: 
+            port = '8883'
+        self.client = MQTTClient(self.devId, self.broker, port, 
+                                user=self.devId, password=self.token, 
+                                keepalive=keepalive)
         self.client.set_callback(self.baseCallback)
-        self.evtTopic     = 'iot-2/type/%s/id/%s/evt/' % (self.devType, self.devId)
-        self.cmdTopicBase = 'iot-2/type/%s/id/%s/cmd/' % (self.devType, self.devId)
+        self.evtTopic     = f'iot3/{self.devId}/evt/'
+        self.cmdTopicBase = f'iot3/{self.devId}/cmd/'
         self.cmdTopic     = self.cmdTopicBase + '+/fmt/+'
-        self.rebootTopic  = 'iotdm-1/type/%s/id/%s/mgmt/initiate/device/reboot' % (self.devType, self.devId)
-        self.resetTopic   = 'iotdm-1/type/%s/id/%s/mgmt/initiate/device/factory_reset' % (self.devType, self.devId)
-        self.updateTopic  = 'iotdm-1/type/%s/id/%s/mgmt/device/update' % (self.devType, self.devId)
-        self.upgradeTopic = 'iotdm-1/type/%s/id/%s/mgmt/initiate/firmware/update' % (self.devType, self.devId)
+        self.metaTopic    = f'iot3/{self.devId}/mgmt/device/meta'
+        self.logTopic     = f'iot3/{self.devId}/mgmt/device/status'
+        self.updateTopic  = f'iot3/{self.devId}/mgmt/device/update'
+        self.rebootTopic  = f'iot3/{self.devId}/mgmt/initiate/device/reboot'
+        self.resetTopic   = f'iot3/{self.devId}/mgmt/initiate/device/factory_reset'
+        self.upgradeTopic = f'iot3/{self.devId}/mgmt/initiate/firmware/update'
         
     def baseCallback(self, topic, msg):
         topicStr = topic.decode('utf-8')
@@ -63,10 +71,10 @@ class Device():
                 pass
         elif topicStr == self.updateTopic:
             print('update')
-            pass							# implement later
+            pass							# to implement later
         elif topicStr == self.upgradeTopic:
             print('upgrade')
-            pass							# implement later
+            pass							# to implement later
         elif self.cmdTopicBase in topicStr and self.callback:
             self.callback(topic, msg)
             
@@ -74,12 +82,17 @@ class Device():
         self.client.publish(self.evtTopic + '%s/fmt/%s' % (evtId, fmt), data, qos=qos, retain=retain)
         
     def connect(self):
+        self.client.set_last_will(f"iot3/{self.devId}/evt/conn/fmt/json", 
+                        '{"status":"offline"}', retain=True, qos=0, )
         self.client.connect()
         self.client.subscribe(self.cmdTopic)
         self.client.subscribe(self.rebootTopic)
         self.client.subscribe(self.resetTopic)
         self.client.subscribe(self.updateTopic)
         self.client.subscribe(self.upgradeTopic)
+        self.client.publish(f"iot3/{self.devId}/evt/conn/fmt/json", '{"status":"online"}', qos=0, retain=True)
+        # publish online
+        # publish META
         
     def reboot(self):
         machine.reset()
@@ -105,13 +118,13 @@ class ConfiguredDevice(Device):
     ConfiguredDevice is a subclass of Device. It adds the configuration file functionality to Device.
     
     '''
-    def __init__(self, cfg=None, devId=None, devType=None, broker=None, token=None, keepalive=60):
+    def __init__(self, cfg=None, broker=None, devId=None, token=None, caFile = None, keepalive=60):
         if (cfg is None and devId is None):
             try:
                 f = open(device_cfg, 'r')
                 data = f.read().replace("'", '"')
                 cfg = json.loads(data)
-                if 'devId' not in cfg or 'devType' not in cfg or 'broker' not in cfg:
+                if 'devId' not in cfg or 'broker' not in cfg:
                     raise Exception('the configuration file is invalid')
                 super().__init__(cfg = cfg)
                 f.close()
@@ -120,7 +133,7 @@ class ConfiguredDevice(Device):
                 raise Exception('the configuration file is invalid')
             self.resetCallback = self.resetCfg
         else:
-            super().__init__(cfg=cfg, devId=devId, devType=devType, broker=broker,
+            super().__init__(cfg=cfg, devId=devId, broker=broker,
                              token=token, keepalive=keepalive)
 
             
@@ -144,7 +157,7 @@ class ConfiguredDevice(Device):
         try:
             if type(cfg) is not dict:
                 cfg = json.loads(cfg.replace("'", '"'))
-            if 'devId' not in cfg or 'devType' not in cfg or 'broker' not in cfg:
+            if 'devId' not in cfg or 'broker' not in cfg:
                 raise Exception('the configuration data is invalid')
             f = open(device_cfg, 'w')
             f.write(json.dumps(cfg))
@@ -152,5 +165,3 @@ class ConfiguredDevice(Device):
         except Exception as e:
             print(e)
             raise Exception('Error in writing the config file')
-            
-            
