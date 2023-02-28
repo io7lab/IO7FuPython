@@ -1,0 +1,9 @@
+{
+    "urls": [
+      ["ComMgr.py", "github:yhur/esp32-IOTDevice-py/ComMgr.py"],
+      ["IOTDevice.py", "github:yhur/esp32-IOTDevice-py/IOTDevice.py"]
+    ],
+    "deps": [
+    ],
+    "version": "0.1"
+  }
