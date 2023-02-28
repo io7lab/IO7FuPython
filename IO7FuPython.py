@@ -2,6 +2,7 @@ import time
 import json
 from umqtt.robust import MQTTClient
 import machine
+import os
 
 class Device():
     '''
@@ -10,16 +11,14 @@ class Device():
             device=Device(
                 broker = '192.168.1.9',
                 devId = 'mydevice',
-                token = 'mytoken',
-                caFile = ''
+                token = 'mytoken'
             )
         
         2. With option.
             option = {
                 broker = '192.168.1.9',
                 devId = 'mydevice',
-                token = 'mytoken',
-                caFile = ''
+                token = 'mytoken'
             }
             device = Device(cfg = option)
 
@@ -29,25 +28,29 @@ class Device():
             device = Device(cfg = option)
  
     '''
-    def __init__(self, cfg=None, broker=None, devId=None, token=None, caFile = None, keepalive=60):
+    def __init__(self, cfg=None, broker=None, devId=None, token=None, keepalive=15):
         if cfg:
             self.broker = cfg['broker']
             self.devId = cfg['devId']
             self.token = cfg['token'] if 'token' in cfg else None
-            self.caFile = cfg['caFile'] if 'caFile' in cfg else None
         else:
             self.broker = broker
             self.devId = devId
             self.token = token
-            self.caFile = caFile
         self.callback = None
         self.resetCallback = None
-        if self.caFile is None:
-            port = '1883'
-        else: 
+        if 'ca.crt' in os.listdir():
             port = '8883'
+            ssl = True
+            ssl_params = {'cert' : 'ca.crt'}
+        else: 
+            port = '1883'
+            ssl = False
+            ssl_params = {}
+        
         self.client = MQTTClient(self.devId, self.broker, port, 
-                                user=self.devId, password=self.token, 
+                                user=self.devId, password=self.token, ssl = ssl,
+                                ssl_params = ssl_params,
                                 keepalive=keepalive)
         self.client.set_callback(self.baseCallback)
         self.evtTopic     = f'iot3/{self.devId}/evt/'
@@ -118,7 +121,7 @@ class ConfiguredDevice(Device):
     ConfiguredDevice is a subclass of Device. It adds the configuration file functionality to Device.
     
     '''
-    def __init__(self, cfg=None, broker=None, devId=None, token=None, caFile = None, keepalive=60):
+    def __init__(self, cfg=None, broker=None, devId=None, token=None, keepalive=60):
         if (cfg is None and devId is None):
             try:
                 f = open(device_cfg, 'r')

@@ -1,4 +1,4 @@
-from IO7FPython import Device, ConfiguredDevice
+from IO7FuPython import Device, ConfiguredDevice
 import json
 import time
 import ComMgr
@@ -12,11 +12,11 @@ def sub_cb(topic, msg):
     jo = json.loads(str(msg,'utf8'))
     if ("pubInterval" in jo['d']):
         pubInterval = jo['d']['pubInterval']
-    elif ("turnOn" in jo['d']):
-        led.on()
-        lastPub = - pubInterval
-    elif ("turnOff" in jo['d']):
-        led.off()
+    elif ("valve" in jo['d']):
+        if jo['d']['valve'] is 'on':
+            led.on()
+        else:
+            led.off()
         lastPub = - pubInterval
 
 nic = ComMgr.startWiFi('iot')
@@ -37,8 +37,3 @@ while True:
     if (time.ticks_ms() - pubInterval) > lastPub:
         lastPub = time.ticks_ms()
         device.publishEvent('status', json.dumps({'d':{'lamp': 'on' if led.value() else 'off'}}))
-
-
-
-
-
