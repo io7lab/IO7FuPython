@@ -85,7 +85,7 @@ class Device():
         self.client.publish(self.evtTopic + '%s/fmt/%s' % (evtId, fmt), data, qos=qos, retain=retain)
         
     def connect(self):
-        self.client.set_last_will(f"iot3/{self.devId}/evt/conn/fmt/json", 
+        self.client.set_last_will(f"iot3/{self.devId}/evt/connection/fmt/json", 
                         '{"d":{"status":"offline"}}', retain=True, qos=0, )
         self.client.connect()
         self.client.subscribe(self.cmdTopic)
@@ -93,7 +93,7 @@ class Device():
         self.client.subscribe(self.resetTopic)
         self.client.subscribe(self.updateTopic)
         self.client.subscribe(self.upgradeTopic)
-        self.client.publish(f"iot3/{self.devId}/evt/conn/fmt/json", '{"d":{"status":"online"}}', qos=0, retain=True)
+        self.client.publish(f"iot3/{self.devId}/evt/connection/fmt/json", '{"d":{"status":"online"}}', qos=0, retain=True)
         # TODO : publish META
         
     def reboot(self):
