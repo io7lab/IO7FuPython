@@ -92,8 +92,8 @@ class BLE():
 
     def advertiser(self):
         name = bytes(self.name, 'UTF-8')
-        self.ble.gap_advertise(100, bytearray(
-            '\x02\x01\x02') + bytearray((len(name) + 1, 0x09)) + name)
+        self.ble.gap_advertise(100, bytearray('\x02\x01\x02', 'utf-8') + 
+                               bytearray((len(name) + 1, 0x09)) + name)
 
     def setCallback(self, callback):
         self.myCallback = callback
