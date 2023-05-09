@@ -10,9 +10,7 @@ def reset_cb(topic, msg):
 def sub_cb(topic, msg):
     global pubInterval
     jo = json.loads(str(msg,'utf8'))
-    if ("pubInterval" in jo['d']):
-        pubInterval = jo['d']['pubInterval']
-    elif ("valve" in jo['d']):
+    if ("valve" in jo['d']):
         if jo['d']['valve'] is 'on':
             led.on()
         else:
@@ -21,19 +19,20 @@ def sub_cb(topic, msg):
 
 nic = ComMgr.startWiFi('iot')
 device = ConfiguredDevice()
-device.setCallback(sub_cb)
+device.setCmdCallback(sub_cb)
 device.setResetCallback(reset_cb)
 
 device.connect()
 
 from machine import Pin
 led = Pin(13, Pin.OUT)
-pubInterval = 5000
-lastPub = time.ticks_ms() - pubInterval
+lastPub = time.ticks_ms() - device.meta['pubInterval']
+
+print(device.cfg())
 
 while True:
     # default is JSON format with QoS 0
     device.loop()
-    if (time.ticks_ms() - pubInterval) > lastPub:
+    if (time.ticks_ms() - device.meta['pubInterval']) > lastPub:
         lastPub = time.ticks_ms()
         device.publishEvent('status', json.dumps({'d':{'lamp': 'on' if led.value() else 'off'}}))

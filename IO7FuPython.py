@@ -37,8 +37,10 @@ class Device():
             self.broker = broker
             self.devId = devId
             self.token = token
-        self.callback = None
+        self.cmdCallback = None
         self.resetCallback = None
+        self.updateCallback = None
+        self.upgradeCallback = None
         if 'ca.crt' in os.listdir():
             port = '8883'
             ssl = True
@@ -62,7 +64,7 @@ class Device():
         self.rebootTopic  = f'iot3/{self.devId}/mgmt/initiate/device/reboot'
         self.resetTopic   = f'iot3/{self.devId}/mgmt/initiate/device/factory_reset'
         self.upgradeTopic = f'iot3/{self.devId}/mgmt/initiate/firmware/update'
-        
+    
     def baseCallback(self, topic, msg):
         topicStr = topic.decode('utf-8')
         if topicStr == self.rebootTopic:
@@ -70,16 +72,14 @@ class Device():
         elif topicStr == self.resetTopic:
             if self.resetCallback:
                 self.resetCallback(topic, msg)
-            else:
-                pass
         elif topicStr == self.updateTopic:
-            print('update')
-            pass							# to implement later
+            if self.updateCallback:
+                self.updateCallback(topic, msg)
         elif topicStr == self.upgradeTopic:
-            print('upgrade')
-            pass							# to implement later
-        elif self.cmdTopicBase in topicStr and self.callback:
-            self.callback(topic, msg)
+            if self.upgradeCallback:
+                self.upgradeCallback(topic, msg)
+        elif self.cmdTopicBase in topicStr and self.cmdCallback:
+            self.cmdCallback(topic, msg)
             
     def publishEvent(self, evtId, data, fmt='json', qos=0, retain=False):
         self.client.publish(self.evtTopic + '%s/fmt/%s' % (evtId, fmt), data, qos=qos, retain=retain)
@@ -99,8 +99,8 @@ class Device():
     def reboot(self):
         machine.reset()
 
-    def setCallback(self, callback):
-        self.callback = callback
+    def setCmdCallback(self, callback):
+        self.cmdCallback = callback
 
     def setResetCallback(self, callback):
         if self.__class__.__name__ == 'Device':   
@@ -137,8 +137,20 @@ class ConfiguredDevice(Device):
         else:
             super().__init__(cfg=cfg, devId=devId, broker=broker,
                              token=token, keepalive=keepalive)
-
+        self.meta = cfg['meta'] if 'meta' in cfg else {}
+        self.meta['pubInterval'] = self.meta['pubInterval'] if 'pubInterval' in self.meta else 5000
+        def updateCallback():
+            print("update meta")
+        self.updateCallback = updateCallback
             
+    def cfg(self):
+        return {
+            "broker": self.broker,
+            "token": self.token,
+            "devId": self.devId,
+            "meta": self.meta
+        }
+    
     def resetCfg(self, topic, msg):
         '''
         This function erase the content of the configuration file to make the factory reset status.
@@ -167,3 +179,4 @@ class ConfiguredDevice(Device):
         except Exception as e:
             print(e)
             raise Exception('Error in writing the config file')
+
