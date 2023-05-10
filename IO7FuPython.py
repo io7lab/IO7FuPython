@@ -37,10 +37,11 @@ class Device():
             self.broker = broker
             self.devId = devId
             self.token = token
+        self.meta = cfg['meta'] if 'meta' in cfg else {}
+        self.meta['pubInterval'] = self.meta['pubInterval'] if 'pubInterval' in self.meta else 5000
         self.cmdCallback = None
         self.resetCallback = None
         self.updateCallback = None
-        self.upgradeCallback = None
         if 'ca.crt' in os.listdir():
             port = '8883'
             ssl = True
@@ -73,11 +74,14 @@ class Device():
             if self.resetCallback:
                 self.resetCallback(topic, msg)
         elif topicStr == self.updateTopic:
+            metafields = json.loads(msg)['d']['fields'][0]
+            if metafields['field'] == 'metadata':
+                self.meta = metafields['value']
+                self.saveCfg(self.cfg())
             if self.updateCallback:
                 self.updateCallback(topic, msg)
         elif topicStr == self.upgradeTopic:
-            if self.upgradeCallback:
-                self.upgradeCallback(topic, msg)
+            pass # implement later
         elif self.cmdTopicBase in topicStr and self.cmdCallback:
             self.cmdCallback(topic, msg)
             
@@ -94,11 +98,23 @@ class Device():
         self.client.subscribe(self.updateTopic)
         self.client.subscribe(self.upgradeTopic)
         self.client.publish(f"iot3/{self.devId}/evt/connection/fmt/json", '{"d":{"status":"online"}}', qos=0, retain=True)
-        # TODO : publish META
+        self.client.publish(f"iot3/{self.devId}/mgmt/device/meta",
+                            '{"d":{"metadata":' + json.dumps(self.meta) + '}}', qos=0, retain=True)
+
+    def cfg(self):
+        return {
+            "broker": self.broker,
+            "token": self.token,
+            "devId": self.devId,
+            "meta": self.meta
+        }
         
     def reboot(self):
         machine.reset()
 
+    def setUpdateCallback(self, callback):
+        self.updateCallback = callback
+        
     def setCmdCallback(self, callback):
         self.cmdCallback = callback
 
@@ -111,6 +127,10 @@ class Device():
             self.client.check_msg()
         except:
             pass
+        
+    @classmethod
+    def saveCfg(cls, cfg):
+        pass
 
 ############### ConfiguredDeice ##############
 device_cfg = 'device.cfg'
@@ -137,20 +157,7 @@ class ConfiguredDevice(Device):
         else:
             super().__init__(cfg=cfg, devId=devId, broker=broker,
                              token=token, keepalive=keepalive)
-        self.meta = cfg['meta'] if 'meta' in cfg else {}
-        self.meta['pubInterval'] = self.meta['pubInterval'] if 'pubInterval' in self.meta else 5000
-        def updateCallback():
-            print("update meta")
-        self.updateCallback = updateCallback
             
-    def cfg(self):
-        return {
-            "broker": self.broker,
-            "token": self.token,
-            "devId": self.devId,
-            "meta": self.meta
-        }
-    
     def resetCfg(self, topic, msg):
         '''
         This function erase the content of the configuration file to make the factory reset status.
@@ -179,4 +186,3 @@ class ConfiguredDevice(Device):
         except Exception as e:
             print(e)
             raise Exception('Error in writing the config file')
-

@@ -28,11 +28,10 @@ from machine import Pin
 led = Pin(13, Pin.OUT)
 lastPub = time.ticks_ms() - device.meta['pubInterval']
 
-print(device.cfg())
-
 while True:
     # default is JSON format with QoS 0
     device.loop()
     if (time.ticks_ms() - device.meta['pubInterval']) > lastPub:
         lastPub = time.ticks_ms()
         device.publishEvent('status', json.dumps({'d':{'lamp': 'on' if led.value() else 'off'}}))
+
