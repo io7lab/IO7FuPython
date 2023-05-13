@@ -117,6 +117,9 @@ class Device():
     def setUserMeta(self, callback):
         self.updateCallback = callback
         
+    def setUpgradeCallback(self, callback):
+        self.upgradeCallback = callback
+
     def setUserCommand(self, callback):
         self.cmdCallback = callback
 
