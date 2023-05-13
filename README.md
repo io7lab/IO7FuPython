@@ -2,7 +2,7 @@
 
 This consists of two modules. the ComMgr and the IO7FuPython.
 
-## IO7FuPython
+## A. IO7FuPython
 
 This can be used to create an IO7 IOT Device. The initializaiton function can be called with either a configuration option or all parameters
 1. With all parameters
@@ -52,7 +52,7 @@ If there is a file named 'device.cfg' and the content is something like above, y
 4. If there is a file named 'ca.crt' with the TLS certicate in it, the device will use the secure mqtt connection to the server.
 
 
-## ESP32 CommMgr.py
+## B. ESP32 CommMgr.py
 
 This Micropython code has the BLE and WiFi connection function. When you pass some string like 'myDevice' as below, it will be the part of the mDNS hostname. The hostname would be myDevice-2cf0c0, where 2cf0c0 is the last three bytes of the MAC address.
 ```python
@@ -62,4 +62,11 @@ This Micropython code has the BLE and WiFi connection function. When you pass so
 The included boot.py shows the basic usage of this component with webrepl
 
 # Library Installation
-`mip.install('github:io7-dev/IO7FuPython/package.json')`
+* Connect ESP32 to the Internet and run the following code
+```
+import mip
+mip.install('github:io7-dev/IO7FuPython/package.json')
+```
+
+# MQTTS Conecction Setup
+* In order to make the device talk to a secure MQTTS broker, copy the certificate file from the server and upload to the ESP32 with the name 'ca.crt'
