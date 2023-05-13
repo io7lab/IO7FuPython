@@ -61,6 +61,5 @@ This Micropython code has the BLE and WiFi connection function. When you pass so
 
 The included boot.py shows the basic usage of this component with webrepl
 
-# TODO
-* publish and update Meta
-* upgrade
+# Library Installation
+`mip.install('github:io7-dev/IO7FuPython/package.json')`
