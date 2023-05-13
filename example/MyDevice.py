@@ -7,19 +7,22 @@ import ComMgr
 def reset_cb(topic, msg):
     print('hello from reset')
     
-def sub_cb(topic, msg):
-    global pubInterval
+def handleCommand(topic, msg):
     jo = json.loads(str(msg,'utf8'))
     if ("valve" in jo['d']):
         if jo['d']['valve'] is 'on':
             led.on()
         else:
             led.off()
-        lastPub = - pubInterval
+        lastPub = - device.meta['pubInterval']
+
+def handleMeta(topic, msg):
+    print('handling metadata update')
 
 nic = ComMgr.startWiFi('iot')
 device = ConfiguredDevice()
-device.setCmdCallback(sub_cb)
+device.setUserCommand(handleCommand)
+device.setUserMeta(handleMeta)
 device.setResetCallback(reset_cb)
 
 device.connect()

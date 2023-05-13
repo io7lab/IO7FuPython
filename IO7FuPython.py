@@ -42,6 +42,7 @@ class Device():
         self.cmdCallback = None
         self.resetCallback = None
         self.updateCallback = None
+        self.upgradeCallback = None
         if 'ca.crt' in os.listdir():
             port = '8883'
             ssl = True
@@ -81,7 +82,8 @@ class Device():
             if self.updateCallback:
                 self.updateCallback(topic, msg)
         elif topicStr == self.upgradeTopic:
-            pass # implement later
+            if self.upgradeCallback:
+                self.upgradeCallback(topic, msg)
         elif self.cmdTopicBase in topicStr and self.cmdCallback:
             self.cmdCallback(topic, msg)
             
@@ -112,10 +114,10 @@ class Device():
     def reboot(self):
         machine.reset()
 
-    def setUpdateCallback(self, callback):
+    def setUserMeta(self, callback):
         self.updateCallback = callback
         
-    def setCmdCallback(self, callback):
+    def setUserCommand(self, callback):
         self.cmdCallback = callback
 
     def setResetCallback(self, callback):
