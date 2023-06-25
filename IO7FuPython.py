@@ -79,6 +79,8 @@ class Device():
             if metafields['field'] == 'metadata':
                 self.meta = metafields['value']
                 self.saveCfg(self.cfg())
+                self.client.publish(f"iot3/{self.devId}/mgmt/device/meta",
+                    '{"d":{"metadata":' + json.dumps(self.meta) + '}}', qos=0, retain=True)
             if self.updateCallback:
                 self.updateCallback(topic, msg)
         elif topicStr == self.upgradeTopic:
