@@ -171,7 +171,7 @@ class ConfiguredDevice(Device):
         '''
         try:
             f = open(device_cfg, 'w')
-            f.write('{}')
+            f.write('{"meta":{}}')
             f.close()
         except Exception as e:
             print(e)
