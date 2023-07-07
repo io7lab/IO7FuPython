@@ -4,6 +4,7 @@ import time
 import ComMgr
 
 def handleCommand(topic, msg):
+    global lastPub
     jo = json.loads(str(msg,'utf8'))
     if ("valve" in jo['d']):
         if jo['d']['valve'] is 'on':
