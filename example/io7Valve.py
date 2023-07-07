@@ -27,5 +27,5 @@ while True:
     device.loop()
     if (time.ticks_ms() - device.meta['pubInterval']) > lastPub:
         lastPub = time.ticks_ms()
-        device.publishEvent('status', json.dumps({'d':{'lamp': 'on' if led.value() else 'off'}}))
+        device.publishEvent('status', json.dumps({'d':{'valve': 'on' if led.value() else 'off'}}))
 
