@@ -69,5 +69,5 @@ import mip
 mip.install('github:io7-dev/IO7FuPython/package.json')
 ```
 
-# MQTTS Conecction Setup
+# MQTTS TLS Conecction Setup
 * In order to make the device talk to a secure MQTTS broker, copy the certificate file from the server and upload to the ESP32 with the name 'ca.crt'
