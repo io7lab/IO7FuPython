@@ -1,4 +1,4 @@
-# IO7 Foundataion for Micropython
+# IO7 Framework for Micropython
 
 This consists of two modules. the ComMgr and the IO7FuPython.
 
