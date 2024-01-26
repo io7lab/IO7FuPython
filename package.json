@@ -4,7 +4,8 @@
       ["IO7FuPython.py", "github:yhur/IO7FuPython/IO7FuPython.py"]
     ],
     "deps": [
-        ["umqtt.simple",  "latest"]
+        ["umqtt.simple",  "latest"],
+        ["umqtt.robust",  "latest"]
     ],
     "version": "0.1"
   }
