@@ -95,7 +95,11 @@ class Device():
     def connect(self):
         self.client.set_last_will(f"iot3/{self.devId}/evt/connection/fmt/json", 
                         '{"d":{"status":"offline"}}', retain=True, qos=0, )
-        self.client.connect()
+        try:
+            self.client.connect()
+        except Exception as e:
+            print(e)
+            machine.reset()
         self.client.subscribe(self.cmdTopic)
         self.client.subscribe(self.rebootTopic)
         self.client.subscribe(self.resetTopic)
