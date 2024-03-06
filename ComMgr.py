@@ -59,6 +59,10 @@ class BLE():
             message = buffer.decode('UTF-8').strip()
             if message == 'reboot':
                 reset()
+            elif message == 'help':
+                self.send('Usage')
+                self.send('\tto set the wifi ssid\n\t\tssid:<your ssid>')
+                self.send('\tto set the wifi password\n\t\tpw:<your password>')
             elif saveWiFiConfig(message):
                 # successful exit with cfg saved. if no ssid/pw,
                 # then the next elif will be evaluated
