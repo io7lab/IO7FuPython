@@ -3,15 +3,8 @@
 # esp.osdebug(None)
 # import webrepl
 # webrepl.start()
-# In order to enable the webrepl, you need to import this and run the setup once
-# import webrepl_setup
-import ComMgr
 
-ble = ComMgr.startBLE('esp32s3')
-nic = ComMgr.startWiFi('esp32s3')
-
-if nic:
-    import esp
-    import webrepl
-    esp.osdebug(None)
-    webrepl.start()
+from machine import Pin
+pin = Pin(14, Pin.IN, Pin.PULL_UP)        # choose the pin depending on your module
+if pin.value():
+    import MyDevice
