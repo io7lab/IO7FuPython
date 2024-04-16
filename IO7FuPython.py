@@ -146,10 +146,8 @@ class Device():
             self.client.check_msg()
         except:
             pass
-        
-    def replMode(self):
         return repl
-    
+        
     @classmethod
     def saveCfg(cls, cfg):
         pass
