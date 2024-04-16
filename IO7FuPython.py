@@ -4,11 +4,11 @@ from umqtt.robust import MQTTClient
 from machine import Pin, reset
 import os
 
-repl = False
+loopSuccess = True
 replPin = Pin(0, Pin.IN, Pin.PULL_UP)
 def replPin_pressed(p):
-    global repl
-    repl = True
+    global loopSuccess
+    loopSuccess = False
     
 replPin.irq(trigger=Pin.IRQ_FALLING|Pin.IRQ_RISING, handler=replPin_pressed)
 
@@ -146,7 +146,7 @@ class Device():
             self.client.check_msg()
         except:
             pass
-        return repl
+        return loopSuccess
         
     @classmethod
     def saveCfg(cls, cfg):
