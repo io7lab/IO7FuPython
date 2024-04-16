@@ -52,6 +52,18 @@ If there is a file named 'device.cfg' and the content is something like above, y
 ```
 4. If there is a file named 'ca.crt' with the TLS certicate in it, the device will use the secure mqtt connection to the server.
 
+5. GPIO 0 is enabled for the REPL mode. In order to use it include this if an break clause as below.
+
+```python
+while True:
+    # this if clause break the loop if the GPIO 0 is pressed
+    if device.replMode():
+        break
+    device.loop()
+    if (time.ticks_ms() - device.meta['pubInterval']) > lastPub:
+        lastPub = time.ticks_ms()
+        device.publishEvent('status', json.dumps({'d':{'valve': 'on' if led.value() else 'off'}}))
+```
 
 # B. ESP32 CommMgr.py
 ## WiFi Client
