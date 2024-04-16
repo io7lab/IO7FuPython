@@ -101,7 +101,7 @@ nic.connect('ssid', 'password')
 nic.ifconfig()          # check if the WiFi is connected or wait until connected
 
 import mip
-mip.install('github:io7-dev/IO7FuPython/')
+mip.install('github:io7lab/IO7FuPython/')
 ```
 
 # MQTTS TLS Conecction Setup
