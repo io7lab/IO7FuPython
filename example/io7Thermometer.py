@@ -1,4 +1,4 @@
-from IO7FuPython import Device, ConfiguredDevice
+from IO7FuPython import ConfiguredDevice
 import json
 import time
 import ComMgr
