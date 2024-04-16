@@ -1,8 +1,16 @@
 import time
 import json
 from umqtt.robust import MQTTClient
-import machine
+from machine import Pin, reset
 import os
+
+repl = False
+replPin = Pin(0, Pin.IN, Pin.PULL_UP)
+def replPin_pressed(p):
+    global repl
+    repl = True
+    
+replPin.irq(trigger=Pin.IRQ_FALLING|Pin.IRQ_RISING, handler=replPin_pressed)
 
 class Device():
     '''
@@ -99,7 +107,7 @@ class Device():
             self.client.connect()
         except Exception as e:
             print(e)
-            machine.reset()
+            reset()
         self.client.subscribe(self.cmdTopic)
         self.client.subscribe(self.rebootTopic)
         self.client.subscribe(self.resetTopic)
@@ -118,7 +126,7 @@ class Device():
         }
         
     def reboot(self):
-        machine.reset()
+        reset()
 
     def setUserMeta(self, callback):
         self.updateCallback = callback
@@ -139,6 +147,9 @@ class Device():
         except:
             pass
         
+    def replMode(self):
+        return repl
+    
     @classmethod
     def saveCfg(cls, cfg):
         pass

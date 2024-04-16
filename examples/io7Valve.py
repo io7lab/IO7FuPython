@@ -2,29 +2,33 @@ from IO7FuPython import ConfiguredDevice
 import json
 import time
 import ComMgr
-import dht
-from machine import Pin
-
 
 def handleCommand(topic, msg):
-    pass
+    global lastPub
+    jo = json.loads(str(msg,'utf8'))
+    if ("valve" in jo['d']):
+        if jo['d']['valve'] is 'on':
+            led.on()
+        else:
+            led.off()
+        lastPub = - device.meta['pubInterval']
 
 nic = ComMgr.startWiFi('iot')
 device = ConfiguredDevice()
 device.setUserCommand(handleCommand)
 
 device.connect()
-sensor = dht.DHT22(Pin(16))
 
+from machine import Pin
+led = Pin(13, Pin.OUT)
 lastPub = time.ticks_ms() - device.meta['pubInterval']
 
 while True:
     # default is JSON format with QoS 0
+    if device.replMode():
+        break
     device.loop()
     if (time.ticks_ms() - device.meta['pubInterval']) > lastPub:
         lastPub = time.ticks_ms()
-        sensor.measure()
-        device.publishEvent('status', json.dumps({'d':{'temperature': sensor.temperature(),
-                                                       'humidity': sensor.humidity()
-                                                       }
-                                                  }))
+        device.publishEvent('status', json.dumps({'d':{'valve': 'on' if led.value() else 'off'}}))
+

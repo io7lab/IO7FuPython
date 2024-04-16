@@ -3,30 +3,32 @@ import json
 import time
 import ComMgr
 
+
+def reset_cb(topic, msg):
+    print('hello from reset')
+
 def handleCommand(topic, msg):
-    global lastPub
-    jo = json.loads(str(msg,'utf8'))
-    if ("valve" in jo['d']):
-        if jo['d']['valve'] is 'on':
-            led.on()
-        else:
-            led.off()
-        lastPub = - device.meta['pubInterval']
+    print('topic is ', topic)
+    print('message is ', str(msg, 'utf-8'))
+
+def handleMeta(topic, msg):
+    print('handling metadata update')
 
 nic = ComMgr.startWiFi('iot')
 device = ConfiguredDevice()
 device.setUserCommand(handleCommand)
+device.setUserMeta(handleMeta)
+device.setResetCallback(reset_cb)
 
 device.connect()
 
-from machine import Pin
-led = Pin(13, Pin.OUT)
 lastPub = time.ticks_ms() - device.meta['pubInterval']
 
 while True:
     # default is JSON format with QoS 0
+    if device.replMode():
+        break
     device.loop()
     if (time.ticks_ms() - device.meta['pubInterval']) > lastPub:
         lastPub = time.ticks_ms()
-        device.publishEvent('status', json.dumps({'d':{'valve': 'on' if led.value() else 'off'}}))
-
+        device.publishEvent('status', json.dumps({'d':{'alive': 'true'}}))
