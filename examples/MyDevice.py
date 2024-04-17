@@ -26,9 +26,8 @@ lastPub = time.ticks_ms() - device.meta['pubInterval']
 
 while True:
     # default is JSON format with QoS 0
-    if device.replMode():
+    if device.loop():
         break
-    device.loop()
     if (time.ticks_ms() - device.meta['pubInterval']) > lastPub:
         lastPub = time.ticks_ms()
         device.publishEvent('status', json.dumps({'d':{'alive': 'true'}}))
