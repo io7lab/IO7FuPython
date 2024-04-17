@@ -41,11 +41,12 @@ class Device():
             self.broker = cfg['broker']
             self.devId = cfg['devId']
             self.token = cfg['token'] if 'token' in cfg else None
+            self.meta = cfg['meta'] if 'meta' in cfg else {}
         else:
             self.broker = broker
             self.devId = devId
             self.token = token
-        self.meta = cfg['meta'] if 'meta' in cfg else {}
+            self.meta = {}
         self.meta['pubInterval'] = self.meta['pubInterval'] if 'pubInterval' in self.meta else 5000
         self.cmdCallback = None
         self.resetCallback = None
