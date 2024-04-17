@@ -24,7 +24,6 @@ led = Pin(13, Pin.OUT)
 lastPub = time.ticks_ms() - device.meta['pubInterval']
 
 while True:
-    # default is JSON format with QoS 0
     if not device.loop():
         break
     if (time.ticks_ms() - device.meta['pubInterval']) > lastPub:
