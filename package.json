@@ -1,6 +1,6 @@
 {
     "urls": [
-      ["IO7FuPython.py", "github:io7lab/IO7FuPython"]
+      ["IO7FuPython.py", "github:yhur/IO7FuPython/IO7FuPython.py"]
     ],
     "deps": [
         ["github:yhur/uComMgr32", "main"],
