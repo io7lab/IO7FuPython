@@ -1,7 +1,6 @@
 # IO7 Framework for Micropython(esp32)
 
 With this library, the developer can create an IO7 ESP32 IOT devices with Micropython.
-This consists of two modules. the ComMgr and the IO7FuPython.
 
 ## A. IO7FuPython
 
@@ -73,8 +72,8 @@ This Micropython library has the BLE and WiFi connection function. This uses the
 ```
 
 ```python
-# ComMgr.startWiFi(name, ssid=None, pw=None)
-nic = ComMgr.startWiFi('myDevice')                  
+# uComMgr32.startWiFi(name, ssid=None, pw=None)
+nic = uComMgr32.startWiFi('myDevice')                  
 ```
 When you pass some string like 'myDevice' as above, this will connects to the wifi and the name will be the part of the mDNS hostname. The hostname would be myDevice-2cf0c0, where 2cf0c0 is the last three bytes of the MAC address.
 
@@ -84,7 +83,7 @@ When you pass some string like 'myDevice' as above, this will connects to the wi
 
 ```python
 # startBLE(name, myBLECallback=None)
-ComMgr.startBLE('myDevice', myCallback)
+uComMgr32.startBLE('myDevice', myCallback)
 ```
 
 This starts the BLE service with the given name and the callback if specified. The `name` will be the BLE device name once started, myBLECallback is the optional callback function you can define and pass. 

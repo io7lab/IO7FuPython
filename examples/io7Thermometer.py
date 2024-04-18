@@ -1,7 +1,7 @@
 from IO7FuPython import ConfiguredDevice
 import json
 import time
-import ComMgr
+import uComMgr32
 import dht
 from machine import Pin
 
@@ -9,7 +9,7 @@ from machine import Pin
 def handleCommand(topic, msg):
     pass
 
-nic = ComMgr.startWiFi('iot')
+nic = uComMgr32.startWiFi('iot')
 device = ConfiguredDevice()
 device.setUserCommand(handleCommand)
 

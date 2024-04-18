@@ -1,7 +1,7 @@
 from IO7FuPython import ConfiguredDevice
 import json
 import time
-import ComMgr
+import uComMgr32
 
 def handleCommand(topic, msg):
     global lastPub
@@ -13,7 +13,7 @@ def handleCommand(topic, msg):
             led.off()
         lastPub = - device.meta['pubInterval']
 
-nic = ComMgr.startWiFi('iot')
+nic = uComMgr32.startWiFi('iot')
 device = ConfiguredDevice()
 device.setUserCommand(handleCommand)
 

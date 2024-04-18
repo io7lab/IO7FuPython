@@ -1,7 +1,7 @@
 from IO7FuPython import ConfiguredDevice
 import json
 import time
-import ComMgr
+import uComMgr32
 
 
 def reset_cb(topic, msg):
@@ -14,7 +14,7 @@ def handleCommand(topic, msg):
 def handleMeta(topic, msg):
     print('handling metadata update')
 
-nic = ComMgr.startWiFi('iot')
+nic = uComMgr32.startWiFi('iot')
 device = ConfiguredDevice()
 device.setUserCommand(handleCommand)
 device.setUserMeta(handleMeta)
