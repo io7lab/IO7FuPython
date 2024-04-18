@@ -1,4 +1,3 @@
-import time
 import json
 from umqtt.robust import MQTTClient
 from machine import Pin, reset
