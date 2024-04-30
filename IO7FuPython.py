@@ -51,10 +51,11 @@ class Device():
         self.resetCallback = None
         self.updateCallback = None
         self.upgradeCallback = None
-        if 'ca.crt' in os.listdir():
+        ca = 'ca.pem' if 'ca.pem' in os.listdir() else 'ca.crt' if 'ca.crt' in os.listdir() else ''
+        if ca:
             port = '8883'
             ssl = True
-            ssl_params = {'cert' : 'ca.crt'}
+            ssl_params = {'cert' : ca}
         else: 
             port = '1883'
             ssl = False
@@ -206,3 +207,4 @@ class ConfiguredDevice(Device):
         except Exception as e:
             print(e)
             raise Exception('Error in writing the config file')
+
