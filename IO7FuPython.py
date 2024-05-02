@@ -51,7 +51,7 @@ class Device():
         self.resetCallback = None
         self.updateCallback = None
         self.upgradeCallback = None
-        ca = 'ca.pem' if 'ca.pem' in os.listdir() else 'ca.crt' if 'ca.crt' in os.listdir() else ''
+        ca = cfg['ca'] if cfg and 'ca' in cfg else 'ca.pem' if 'ca.pem' in os.listdir() else ''
         if ca:
             port = '8883'
             ssl = True
@@ -79,6 +79,7 @@ class Device():
     def baseCallback(self, topic, msg):
         topicStr = topic.decode('utf-8')
         if topicStr == self.rebootTopic:
+            self.client.disconnect()
             self.reboot()
         elif topicStr == self.resetTopic:
             if self.resetCallback:
@@ -207,4 +208,3 @@ class ConfiguredDevice(Device):
         except Exception as e:
             print(e)
             raise Exception('Error in writing the config file')
-
