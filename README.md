@@ -49,7 +49,7 @@ Just create a ConfiguredDevice as follows with above configuration file.
     device = ConfiguredDevice()
     device.setCallback(sub_cb)				# subsription callback. ie. command handler
 ```
-4. If there is a file named `ca.pem` with the TLS CA certicate in it, the device will use the secure mqtt connection to the server. Or if device.cfg has `ca` and there is a file specified by `ca`, then the file will be used as the TLS Certificate.
+4. If there is a file named `ca.pem` with the TLS CA certicate in it, the device will use the secure mqtt connection(ie. mqtts) to the server. Or if device.cfg has `ca` and there is a file specified by `ca`, then the file will be used as the TLS Certificate.
 ```json
 {"broker": "yourio7.server.com", "token": "mytoken", "devType": "mytype", "devId": "myid", "ca":"ca.txt"}
 ```
