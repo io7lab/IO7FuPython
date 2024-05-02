@@ -1,6 +1,6 @@
 # IO7 Framework for Micropython(esp32)
 
-With this library, the developer can create an IO7 ESP32 IOT devices with Micropython.
+With this library, the developer can create an io7 ESP32 IOT devices with Micropython.
 
 ## A. IO7FuPython
 
