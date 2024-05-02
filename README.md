@@ -4,7 +4,7 @@ With this library, the developer can create an io7 ESP32 IOT devices with Microp
 
 ## A. IO7FuPython
 
-This can be used to create an IO7 IOT Device. The initializaiton function can be called with either a configuration option or all parameters
+This can be used to create an io7 IOT Device. The initializaiton function can be called with either a configuration option or all parameters
 1. With all parameters
 ```python
     from IOTDevice import Device
