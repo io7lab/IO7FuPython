@@ -42,7 +42,7 @@ This can be especially usefull when the configuration is stored in a file
 ```
 3. With a file named `device.cfg` and the content is something like this, you can use the ConfiguredDevice.
 ```json
-{"broker": "yourio7.server.com", "token": "mytoken", "devType": "mytype", "devId": "myid"}
+{"broker": "yourio7.server.com", "token": "mytoken", "devId": "myid"}
 ```
 Just create a ConfiguredDevice as follows with above configuration file.
 ```python
@@ -51,7 +51,7 @@ Just create a ConfiguredDevice as follows with above configuration file.
 ```
 4. If there is a file named `ca.pem` with the TLS CA certicate in it, the device will use the secure mqtt connection(ie. mqtts) to the server. Or if device.cfg has `ca` and there is a file specified by `ca`, then the file will be used as the TLS Certificate.
 ```json
-{"broker": "yourio7.server.com", "token": "mytoken", "devType": "mytype", "devId": "myid", "ca":"ca.txt"}
+{"broker": "yourio7.server.com", "token": "mytoken", "devId": "myid", "ca":"ca.txt"}
 ```
 
 5. GPIO 0 is enabled for the REPL mode. In order to use it include this if an break clause as below.
