@@ -82,3 +82,6 @@ mip.install('github:io7lab/IO7FuPython/')
 
 # MQTTS TLS Conecction Setup
 * As mentioned above, in order to make the device talk to a secure MQTTS broker, copy the certificate file from the server and upload to the ESP32 Micropython environment with the name 'ca.pem', or any name you want and specify in the `device.cfg` file.
+
+## Important
+If 'ca.pem' is found, the device will open the secure mqtt session. This applies even `device.cfg` doesn't have the `ca` attribute. The `ca` attribute is used to specify the name of the certificate file if the name is other than `ca.pem`, or to ignore the `ca.pem` even if it exists by giving empty value to it, ie. `"ca":""`.
