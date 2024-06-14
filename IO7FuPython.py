@@ -109,6 +109,8 @@ class Device():
             self.client.connect()
         except Exception as e:
             print(e)
+            print('IO7FuPython : fix error for the connection information and/or certificate if required')
+            print('Rebooting the Device')
             reset()
         self.client.subscribe(self.cmdTopic)
         self.client.subscribe(self.rebootTopic)
