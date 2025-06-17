@@ -4,10 +4,11 @@ This is a part of io7 IOT Platform https://github.com/io7lab to help build an IO
 
 With this library, the developer can create an io7 ESP32 IOT devices with Micropython.
 
-## A. IO7FuPython
+# 1. IO7FuPython Introduction
 
 This can be used to create an io7 IOT Device. The initializaiton function can be called with either a configuration option or all parameters
-1. With all parameters
+1. Configuring the Device
+* with all arguments 
 ```python
     from IOTDevice import Device
     
@@ -19,7 +20,7 @@ This can be used to create an io7 IOT Device. The initializaiton function can be
     device.setCallback(sub_cb)				# subsription callback. ie. command handler
     device.setResetCallback(reset_cb)			# factory reset callback. it clears 'device.cfg' file.
 ```
-2. With configuration dict object.
+* With configuration dict object.
 ```python
     from IOTDevice import Device
     
@@ -32,7 +33,7 @@ This can be used to create an io7 IOT Device. The initializaiton function can be
     device.setCallback(sub_cb)				# subsription callback. ie. command handler
     device.setResetCallback(reset_cb)			# factory reset callback. it clears 'device.cfg' file.
 ```
-This can be especially usefull when the configuration is stored in a file
+This can be especially useful when the configuration is stored in a file
 ```python
     from IOTDevice import Device
     
@@ -42,21 +43,21 @@ This can be especially usefull when the configuration is stored in a file
     device.setCallback(sub_cb)				# subsription callback. ie. command handler
     device.setResetCallback(reset_cb)			# factory reset callback. it clears 'device.cfg' file.
 ```
-3. With a file named `device.cfg` and the content is something like this, you can use the ConfiguredDevice.
+* With a file named `device.cfg` of the content like below, you can use the ConfiguredDevice.
 ```json
 {"broker": "yourio7.server.com", "token": "mytoken", "devId": "myid"}
 ```
-Just create a ConfiguredDevice as follows with above configuration file.
+2. Instantiate a ConfiguredDevice with above configuration file as follows.
 ```python
     device = ConfiguredDevice()
     device.setCallback(sub_cb)				# subsription callback. ie. command handler
 ```
-4. If there is a file named `ca.pem` with the TLS CA certicate in it, the device will use the secure mqtt connection(ie. mqtts) to the server. Or if device.cfg has `ca` and there is a file specified by `ca`, then the file will be used as the TLS Certificate.
+3. If a secure MQTT connection is required, create the `ca.pem` file. When there is a file named `ca.pem` with the TLS CA certicate in it, the device will use the secure mqtt connection(ie. mqtts) to the server. Or if device.cfg has `ca` attribute and there is a file specified by this, then the file will be used as the TLS Certificate.
 ```json
 {"broker": "yourio7.server.com", "token": "mytoken", "devId": "myid", "ca":"ca.pem"}
 ```
 
-5. GPIO 0 is enabled for the REPL mode. In order to use it include this if an break clause as below.
+4. GPIO 0 is enabled for the REPL mode. In order to use it include this, add this `if clause` as below. This will breaks the while loop and get in to the Python interpreter over the Serial connection.
 
 ```python
 while True:
@@ -68,8 +69,43 @@ while True:
         lastPub = time.ticks_ms()
         device.publishEvent('status', json.dumps({'d':{'valve': 'on' if led.value() else 'off'}}))
 ```
+5. Sample Device : This is a sample io7 Device with IO7FuPython library. 
+```python
+from IO7FuPython import ConfiguredDevice
+import json
+import time
+import uComMgr32
 
-# Library Installation
+def handleCommand(topic, msg):
+    global lastPub
+    jo = json.loads(str(msg,'utf8'))
+    if ("lamp" in jo['d']):
+        if jo['d']['lamp'] is 'on':
+            lamp.on()
+        else:
+            lamp.off()
+        lastPub = - device.meta['pubInterval']
+
+nic = uComMgr32.startWiFi('lamp')
+device = ConfiguredDevice()
+device.setUserCommand(handleCommand)
+
+device.connect()
+
+from machine import Pin
+lamp = Pin(15, Pin.OUT)
+lastPub = time.ticks_ms() - device.meta['pubInterval']
+
+while True:
+    # default is JSON format with QoS 0
+    if not device.loop():
+        break
+    if (time.ticks_ms() - device.meta['pubInterval']) > lastPub:
+        lastPub = time.ticks_ms()
+        device.publishEvent('status', json.dumps({'d':{'lamp': 'on' if lamp.value() else 'off'}}))
+
+```
+# 2. Library Installation
 * Connect ESP32 to the Internet and run the following code
 ```python
 import network
@@ -82,7 +118,7 @@ import mip
 mip.install('github:io7lab/IO7FuPython/')
 ```
 
-# MQTTS TLS Conecction Setup
+# 3. MQTTS TLS Conecction Setup
 * As mentioned above, in order to make the device talk to a secure MQTTS broker, copy the certificate file from the server and upload to the ESP32 Micropython environment with the name 'ca.pem', or any name you want and specify in the `device.cfg` file.
 
 ## Important
