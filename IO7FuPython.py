@@ -2,6 +2,8 @@ import json
 from umqtt.robust import MQTTClient
 from machine import Pin, reset
 import os
+import re
+import urequests
 
 loopSuccess = True
 replPin = Pin(0, Pin.IN, Pin.PULL_UP)
@@ -9,7 +11,57 @@ def replPin_pressed(p):
     global loopSuccess
     loopSuccess = False
     
+deviceApp ='device.py'
+
 replPin.irq(trigger=Pin.IRQ_FALLING|Pin.IRQ_RISING, handler=replPin_pressed)
+
+def is_valid_url(url):
+    if not url or not isinstance(url, str):
+        return False
+    
+    if not (url.startswith('http://') or url.startswith('https://')):
+        return False
+    
+    url_without_protocol = url.replace('https://', '').replace('http://', '')        
+    if not url_without_protocol or url_without_protocol.startswith('/'):
+        return False
+
+    domain_part = url_without_protocol.split('/')[0]
+    if '.' not in domain_part and domain_part != 'localhost':
+        return False
+        
+    return True
+                
+def rotate_file():
+    archive_dir = './archive'
+    try:
+        os.stat(archive_dir)
+    except OSError:
+        os.mkdir(archive_dir)
+    
+    try:
+        files = os.listdir(archive_dir)
+    except OSError:
+        files = []
+
+    #pattern = re.compile(r'^device\.py\.(\d+)$')
+    pattern = re.compile(rf"^{deviceApp}\.(\d+)$")
+    max_num = -1
+
+    for f in files:
+        match = pattern.match(f)
+        if match:
+            num = int(match.group(1))
+            if num > max_num:
+                max_num = num
+    print(f"mx {max_num}")
+    with open(deviceApp, 'rb') as fsrc:
+        with open(f"archive/{deviceApp}.{max_num + 1}", 'wb') as fdst:
+            while True:
+                buf = fsrc.read(512)  # read in small chunks to save RAM
+                if not buf:
+                    break
+                fdst.write(buf)
 
 class Device():
     '''
@@ -50,7 +102,6 @@ class Device():
         self.cmdCallback = None
         self.resetCallback = None
         self.updateCallback = None
-        self.upgradeCallback = None
         ca = cfg['ca'] if cfg and 'ca' in cfg else 'ca.pem' if 'ca.pem' in os.listdir() else ''
         if ca:
             port = '8883'
@@ -94,14 +145,17 @@ class Device():
             if self.updateCallback:
                 self.updateCallback(topic, msg)
         elif topicStr == self.upgradeTopic:
-            if self.upgradeCallback:
+            if hasattr(self, 'upgradeCallback') and callable(getattr(self, 'upgradeCallback')):
                 self.upgradeCallback(topic, msg)
         elif self.cmdTopicBase in topicStr and self.cmdCallback:
             self.cmdCallback(topic, msg)
-            
+    
     def publishEvent(self, evtId, data, fmt='json', qos=0, retain=False):
         self.client.publish(self.evtTopic + '%s/fmt/%s' % (evtId, fmt), data, qos=qos, retain=retain)
-        
+
+    def upgradeCallback(self, topic, msg):
+        pass
+
     def connect(self):
         self.client.set_last_will(f"iot3/{self.devId}/evt/connection/fmt/json", 
                         '{"d":{"status":"offline"}}', retain=True, qos=0, )
@@ -134,9 +188,6 @@ class Device():
 
     def setUserMeta(self, callback):
         self.updateCallback = callback
-        
-    def setUpgradeCallback(self, callback):
-        self.upgradeCallback = callback
 
     def setUserCommand(self, callback):
         self.cmdCallback = callback
@@ -194,6 +245,39 @@ class ConfiguredDevice(Device):
             print(e)
             raise Exception('Error in erasing the config file')
         
+    def upgradeCallback(self, topic, msg):
+        try:
+            upgrade_url = json.loads(msg)['d']['upgrade']['fw_url']
+        except (ValueError, KeyError, TypeError):
+            print('Error parsing upgrade message: invalid JSON or missing keys')
+            return
+
+        if is_valid_url(upgrade_url):
+            print('rotate')
+            rotate_file()
+            print('rotated')
+            # Download the firmware
+            try:
+                response = urequests.get(upgrade_url)
+                
+                if response.status_code == 200:
+                    # Write the content to file
+                    with open(deviceApp, 'wb') as f:
+                        f.write(response.content)
+                    
+                    print('Firmware download completed')
+                    response.close()
+                    reset()
+                else:
+                    print('Download failed with status:', response.status_code)
+                    response.close()
+            except OSError as err:
+                print('Network/file error:', str(err))
+            except Exception as err:
+                print('Download error:', str(err))
+        else:
+            print('Invalid URL for upgrade')
+
     @classmethod
     def saveCfg(cls, cfg):
         '''
@@ -210,3 +294,4 @@ class ConfiguredDevice(Device):
         except Exception as e:
             print(e)
             raise Exception('Error in writing the config file')
+
