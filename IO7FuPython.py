@@ -87,7 +87,7 @@ class Device():
             device = Device(cfg = option)
  
     '''
-    def __init__(self, cfg=None, broker=None, devId=None, token=None, keepalive=15):
+    def __init__(self, cfg=None, broker=None, devId=None, token=None, keepalive=60):
         if cfg:
             self.broker = cfg['broker']
             self.devId = cfg['devId']
