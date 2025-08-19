@@ -1,14 +1,18 @@
-# IO7 Framework for Micropython(esp32)
+# IO7 Framework for MicroPython (ESP32)
 
-This is a part of io7 IOT Platform https://github.com/io7lab to help build an IOT device.
 
-With this library, the developer can create an io7 ESP32 IOT devices with Micropython.
+This is part of the io7 IoT Platform (https://github.com/io7lab) to help build IoT devices.
+
+
+With this library, developers can create io7 ESP32 IoT devices using MicroPython.
+
 
 # 1. IO7FuPython Introduction
 
-This can be used to create an io7 IOT Device. The initializaiton function can be called with either a configuration option or all parameters
+This can be used to create an io7 IoT device. The initialization function can be called with either a configuration option or all parameters.
+
 1. Configuring the Device
-* with all arguments 
+* With all arguments
 ```python
     from IOTDevice import Device
     
@@ -17,10 +21,10 @@ This can be used to create an io7 IOT Device. The initializaiton function can be
         devId = 'mydevice',
         token = 'mytoken'
     )
-    device.setCallback(sub_cb)				# subsription callback. ie. command handler
-    device.setResetCallback(reset_cb)			# factory reset callback. it clears 'device.cfg' file.
+    device.setCallback(sub_cb)                # subscription callback, i.e., command handler
+    device.setResetCallback(reset_cb)         # factory reset callback; it clears the 'device.cfg' file.
 ```
-* With configuration dict object.
+* With a configuration dict object
 ```python
     from IOTDevice import Device
     
@@ -30,38 +34,38 @@ This can be used to create an io7 IOT Device. The initializaiton function can be
         token = 'mytoken'
     }
     device = Device(cfg = option)
-    device.setCallback(sub_cb)				# subsription callback. ie. command handler
-    device.setResetCallback(reset_cb)			# factory reset callback. it clears 'device.cfg' file.
+    device.setCallback(sub_cb)                # subscription callback, i.e., command handler
+    device.setResetCallback(reset_cb)         # factory reset callback; it clears the 'device.cfg' file.
 ```
-This can be especially useful when the configuration is stored in a file
+This can be especially useful when the configuration is stored in a file.
 ```python
     from IOTDevice import Device
     
     f = open('device.cfg', 'w')
     option = json.loads(f.read())
     device = Device(cfg = option)
-    device.setCallback(sub_cb)				# subsription callback. ie. command handler
-    device.setResetCallback(reset_cb)			# factory reset callback. it clears 'device.cfg' file.
+    device.setCallback(sub_cb)                # subscription callback, i.e., command handler
+    device.setResetCallback(reset_cb)         # factory reset callback; it clears the 'device.cfg' file.
 ```
-* With a file named `device.cfg` of the content like below, you can use the ConfiguredDevice.
+* With a file named `device.cfg` containing the content below, you can use the ConfiguredDevice:
 ```json
 {"broker": "yourio7.server.com", "token": "mytoken", "devId": "myid"}
 ```
-2. Instantiate a ConfiguredDevice with above configuration file as follows.
+2. Instantiate a ConfiguredDevice with the above configuration file as follows:
 ```python
     device = ConfiguredDevice()
-    device.setCallback(sub_cb)				# subsription callback. ie. command handler
+    device.setCallback(sub_cb)                # subscription callback, i.e., command handler
 ```
-3. If a secure MQTT connection is required, create the `ca.pem` file. When there is a file named `ca.pem` with the TLS CA certicate in it, the device will use the secure mqtt connection(ie. mqtts) to the server. Or if device.cfg has `ca` attribute and there is a file specified by this, then the file will be used as the TLS Certificate.
+3. If a secure MQTT connection is required, provide the `ca.pem` file. When there is a file named `ca.pem` containing the TLS CA certificate, the device will use a secure MQTT connection (i.e., MQTTS) to the server. If `device.cfg` has a `ca` attribute and there is a file specified by this, then that file will be used as the TLS certificate.
 ```json
 {"broker": "yourio7.server.com", "token": "mytoken", "devId": "myid", "ca":"ca.pem"}
 ```
 
-4. GPIO 0 is enabled for the REPL mode. In order to use it include this, add this `if clause` as below. This will breaks the while loop and get in to the Python interpreter over the Serial connection.
+4. GPIO 0 is enabled for REPL mode. To use it, add the following `if` clause as shown below. This will break the while loop and enter the Python interpreter over the serial connection.
 
 ```python
 while True:
-    # this if clause break the loop if the GPIO 0 is pressed
+    # this if clause breaks the loop if GPIO 0 is pressed
     if device.replMode():
         break
     device.loop()
@@ -69,7 +73,7 @@ while True:
         lastPub = time.ticks_ms()
         device.publishEvent('status', json.dumps({'d':{'valve': 'on' if led.value() else 'off'}}))
 ```
-5. Sample Device : This is a sample io7 Device with IO7FuPython library. 
+5. Sample Device: This is a sample io7 device using the IO7FuPython library.
 ```python
 from IO7FuPython import ConfiguredDevice
 import json
@@ -106,20 +110,22 @@ while True:
 
 ```
 # 2. Library Installation
-* Connect ESP32 to the Internet and run the following code
+
+* Connect the ESP32 to the Internet and run the following code:
 ```python
 import network
 nic = network.WLAN(network.STA_IF)
 nic.active(True)
 nic.connect('ssid', 'password')
-nic.ifconfig()          # check if the WiFi is connected or wait until connected
+    nic.ifconfig()          # check if WiFi is connected or wait until it is connected
 
 import mip
 mip.install('github:io7lab/IO7FuPython/')
 ```
 
-# 3. MQTTS TLS Conecction Setup
-* As mentioned above, in order to make the device talk to a secure MQTTS broker, copy the certificate file from the server and upload to the ESP32 Micropython environment with the name 'ca.pem', or any name you want and specify in the `device.cfg` file.
+# 3. MQTTS TLS Connection Setup
+
+* As mentioned above, to enable the device to communicate with a secure MQTTS broker, copy the certificate file from the server and upload it to the ESP32 MicroPython environment with the name 'ca.pem', or any name you want, and specify it in the `device.cfg` file.
 
 ## Important
-If 'ca.pem' is found, the device will open the secure mqtt session. This applies even `device.cfg` doesn't have the `ca` attribute. The `ca` attribute is used to specify the name of the certificate file if the name is other than `ca.pem`, or to ignore the `ca.pem` even if it exists by giving empty value to it, ie. `"ca":""`.
+If `ca.pem` is found, the device will open a secure MQTT session. This applies even if `device.cfg` doesn't have the `ca` attribute. The `ca` attribute is used to specify the name of the certificate file if the name is other than `ca.pem`, or to ignore `ca.pem` even if it exists by giving an empty value to it, i.e., `"ca":""`.
