@@ -117,7 +117,7 @@ class Device():
                                 ssl_params = ssl_params,
                                 keepalive=keepalive)
         self.client.set_callback(self.baseCallback)
-        self.evtTopic     = f'iot3/{self.devId}/evt/'
+        self.evtTopicBase = f'iot3/{self.devId}/evt/'
         self.cmdTopicBase = f'iot3/{self.devId}/cmd/'
         self.cmdTopic     = self.cmdTopicBase + '+/fmt/+'
         self.metaTopic    = f'iot3/{self.devId}/mgmt/device/meta'
@@ -151,7 +151,7 @@ class Device():
             self.cmdCallback(topic, msg)
     
     def publishEvent(self, evtId, data, fmt='json', qos=0, retain=False):
-        self.client.publish(self.evtTopic + '%s/fmt/%s' % (evtId, fmt), data, qos=qos, retain=retain)
+        self.client.publish(self.evtTopicBase + '%s/fmt/%s' % (evtId, fmt), data, qos=qos, retain=retain)
 
     def upgradeCallback(self, topic, msg):
         pass
