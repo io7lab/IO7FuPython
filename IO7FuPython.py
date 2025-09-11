@@ -44,8 +44,7 @@ def rotate_file():
     except OSError:
         files = []
 
-    #pattern = re.compile(r'^device\.py\.(\d+)$')
-    pattern = re.compile(rf"^{deviceApp}\.(\d+)$")
+    pattern = re.compile("^" + deviceApp + r"\.(\d+)$")
     max_num = -1
 
     for f in files:
