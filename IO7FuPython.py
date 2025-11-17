@@ -105,7 +105,9 @@ class Device():
         if ca:
             port = '8883'
             ssl = True
-            ssl_params = {'cert' : ca}
+            with open(ca, 'r') as f:
+                cadata=f.read()
+            ssl_params = {'cadata':cadata, 'server_hostname' : self.broker}
         else: 
             port = '1883'
             ssl = False
