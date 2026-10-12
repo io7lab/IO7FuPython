@@ -131,7 +131,9 @@ class Device():
     def baseCallback(self, topic, msg):
         topicStr = topic.decode('utf-8')
         if topicStr == self.rebootTopic:
+            import time
             self.client.disconnect()
+            time.sleep(1)
             self.reboot()
         elif topicStr == self.resetTopic:
             if self.resetCallback:
